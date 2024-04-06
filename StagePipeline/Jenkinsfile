@@ -23,6 +23,8 @@ pipeline {
         registryCredential = 'ecr:eu-west-2:awscred'
         appRegistry = '436549840164.dkr.ecr.eu-west-2.amazonaws.com/projectimg'
         projectRegistry = "https://436549840164.dkr.ecr.eu-west-2.amazonaws.com/projectimg"
+        cluster = 'myProjectstaging'
+        service = 'projectappsvc'
 
     }
     stages {
@@ -107,6 +109,15 @@ pipeline {
                     }
                 }
             }
+        }
+        stage('Deploy to ECS staging'){
+            steps{
+                withAWS(credentials: 'awscred', region: 'eu-west-2'){
+                    sh 'aws ecs update-service --cluster ${cluster} --service ${service} --force-new-deployment'
+
+                }
+            }
+
         }
 
 
