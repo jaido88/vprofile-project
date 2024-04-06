@@ -20,6 +20,9 @@ pipeline {
         NEXUS_LOGIN = 'nexuslogin'
         SONARSERVER = 'sonarserver'
         SONARSCANNER = 'sonarscanner'
+        registryCredential = 'ecr:eu-west-2:awscred'
+        appRegistry = '436549840164.dkr.ecr.eu-west-2.amazonaws.com/projectimg'
+        projectRegistry = "https://436549840164.dkr.ecr.eu-west-2.amazonaws.com/projectimg"
 
     }
     stages {
@@ -86,6 +89,23 @@ pipeline {
                  
 
                 )
+            }
+        }
+        stage('Build App Image'){
+            steps {
+                script{
+                    dockerImage = docker.build( appRegistry+ ":$BUILD_NUMBER", ./Docker-files/app/multistage/")
+                }
+            }
+        }
+        stage('Upload App Image'){
+            steps {
+                script{
+                    docker.withRegistry( projectRegistry, registryCredential ) {
+                        dockerImage.push("$BUILD_NUMBER")
+                        dockerImage.push('latest')
+                    }
+                }
             }
         }
 
